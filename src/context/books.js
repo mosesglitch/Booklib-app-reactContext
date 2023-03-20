@@ -4,11 +4,15 @@ import axios from "axios";
 const BooksContext = createContext();
 
 function Provider({ children }) {
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState([
+    {
+      title: "Harry Potter",
+      id: 2,
+    },
+  ]);
 
   const fetchBooks = async () => {
     const response = await axios.get("http://localhost:3001/books");
-
     setBooks(response.data);
   };
   const editBookById = async (id, newTitle) => {
