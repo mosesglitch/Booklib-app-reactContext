@@ -1,26 +1,30 @@
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import axios from "axios";
 
 const BooksContext = createContext();
 
 function Provider({ children }) {
-  const [books, setBooks] = useState([
-    {
-      title: "Harry Potter",
-      id: 2,
-    },
-  ]);
+  const [mbooks, setBooks] = useState([]);
 
-  const fetchBooks = async () => {
+  console.log(mbooks);
+  const fetchBooks = useCallback(async () => {
     const response = await axios.get("http://localhost:3001/books");
-    setBooks(response.data);
-  };
+    response.data
+      ? setBooks(response.data)
+      : setBooks({
+          title: "Harry Potter",
+          id: 2,
+        });
+    console.log("haha");
+  }, []);
+
+  // const stableFetchBooks=useCallback(fetchBooks,[])
   const editBookById = async (id, newTitle) => {
     const response = await axios.put(`http://localhost:3001/books/${id}`, {
       title: newTitle,
     });
 
-    const updatedBooks = books.map((book) => {
+    const updatedBooks = mbooks.map((book) => {
       if (book.id === id) {
         return { ...book, ...response.data };
       }
@@ -34,7 +38,7 @@ function Provider({ children }) {
   const deleteBookById = async (id) => {
     await axios.delete(`http://localhost:3001/books/${id}`);
 
-    const updatedBooks = books.filter((book) => {
+    const updatedBooks = mbooks.filter((book) => {
       return book.id !== id;
     });
 
@@ -46,19 +50,21 @@ function Provider({ children }) {
       title,
     });
 
-    const updatedBooks = [...books, response.data];
+    const updatedBooks = [...mbooks, response.data];
     setBooks(updatedBooks);
   };
 
   const valueToShare = {
-    books,
+    mbooks,
+
     deleteBookById,
     editBookById,
     createBook,
     fetchBooks,
   };
+  console.log(valueToShare);
   return (
-    <BooksContext.Provider value={{ valueToShare }}>
+    <BooksContext.Provider value={valueToShare}>
       {children}
     </BooksContext.Provider>
   );
